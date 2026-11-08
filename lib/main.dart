@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/bahan_provider.dart';
+import 'screens/home_screen.dart';
 import 'services/supabase_config.dart';
 
 /// Palet warna utama aplikasi FoodGuard
@@ -134,37 +135,7 @@ class FoodGuardApp extends StatelessWidget {
       title: 'FoodGuard',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
-      home: const Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.eco,
-                size: 72,
-                color: AppColors.primary,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'FoodGuard',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Pantau Masa Simpan Bahan Makanan',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      home: const HomeScreen(),
     );
   }
 }
