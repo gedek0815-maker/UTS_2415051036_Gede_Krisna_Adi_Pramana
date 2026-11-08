@@ -10,3 +10,4 @@ class SupabaseConfig {
   /// Helper untuk mengakses SupabaseClient instance
   static SupabaseClient get client => Supabase.instance.client;
 }
+
