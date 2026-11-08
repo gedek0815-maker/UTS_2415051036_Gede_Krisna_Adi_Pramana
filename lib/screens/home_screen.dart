@@ -5,6 +5,7 @@ import '../providers/bahan_provider.dart';
 import '../widgets/bahan_card.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
+import 'food_list_screen.dart';
 
 /// Screen utama: HomeScreen Dashboard
 /// Menampilkan ringkasan inventaris (summary cards), status bahan segera olah,
@@ -85,11 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return _buildDashboardTab();
       case 1:
-        return _buildPlaceholderTab(
-          title: 'Katalog Bahan Makanan',
-          message: 'Daftar lengkap bahan makanan dengan LayoutBuilder akan tampil di Tahap 11.',
-          icon: Icons.restaurant_menu_rounded,
-        );
+        return const FoodListScreen();
       case 2:
         return _buildPlaceholderTab(
           title: 'Profil Pengguna',
@@ -628,3 +625,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
