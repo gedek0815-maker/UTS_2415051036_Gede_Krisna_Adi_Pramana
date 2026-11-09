@@ -4,6 +4,7 @@ import '../main.dart';
 import '../models/bahan_makanan.dart';
 import '../providers/bahan_provider.dart';
 import '../widgets/bahan_card.dart';
+import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
 import 'add_food_screen.dart';
@@ -511,6 +512,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   bahan: bahan,
                   onTap: () => _navigateToDetail(bahan),
                   onEdit: () => _navigateToEdit(bahan),
+                  onDelete: () => DeleteConfirmationDialog.show(context, bahan: bahan),
                 ),
               ),
       ],
@@ -569,6 +571,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   bahan: bahan,
                   onTap: () => _navigateToDetail(bahan),
                   onEdit: () => _navigateToEdit(bahan),
+                  onDelete: () => DeleteConfirmationDialog.show(context, bahan: bahan),
                 ),
               ),
       ],

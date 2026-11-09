@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../models/bahan_makanan.dart';
+import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/expired_badge.dart';
 import '../widgets/kategori_chip.dart';
 import 'edit_food_screen.dart';
@@ -63,6 +64,19 @@ class FoodDetailScreen extends StatelessWidget {
               }
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Hapus Bahan',
+            onPressed: () async {
+              final deleted = await DeleteConfirmationDialog.show(
+                context,
+                bahan: bahan,
+              );
+              if (deleted == true && context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -116,6 +130,38 @@ class FoodDetailScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Tombol Hapus Bahan Makanan
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final deleted = await DeleteConfirmationDialog.show(
+                    context,
+                    bahan: bahan,
+                  );
+                  if (deleted == true && context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: const Text('Hapus Bahan Makanan'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.danger,
+                  side: const BorderSide(color: AppColors.danger),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
