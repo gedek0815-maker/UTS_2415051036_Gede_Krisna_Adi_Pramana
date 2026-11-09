@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
+import '../models/bahan_makanan.dart';
 import '../providers/bahan_provider.dart';
 import '../widgets/bahan_card.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
+import 'add_food_screen.dart';
 import 'food_detail_screen.dart';
 import 'food_list_screen.dart';
 
@@ -55,6 +57,19 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
       body: _buildCurrentTab(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddFoodScreen(),
+            ),
+          );
+        },
+        tooltip: 'Tambah Bahan',
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
