@@ -6,6 +6,7 @@ import '../providers/bahan_provider.dart';
 import '../widgets/bahan_card.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
+import 'edit_food_screen.dart';
 import 'food_detail_screen.dart';
 
 /// Screen: FoodListScreen
@@ -37,6 +38,15 @@ class _FoodListScreenState extends State<FoodListScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _navigateToEdit(BahanMakanan bahan) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditFoodScreen(bahan: bahan),
+      ),
+    );
   }
 
   @override
@@ -268,6 +278,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
               ),
             );
           },
+          onEdit: () => _navigateToEdit(bahan),
         );
       },
     );
@@ -301,6 +312,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
               ),
             );
           },
+          onEdit: () => _navigateToEdit(bahan),
         );
       },
     );

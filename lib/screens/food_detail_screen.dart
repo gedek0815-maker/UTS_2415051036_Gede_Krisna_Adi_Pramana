@@ -3,6 +3,7 @@ import '../main.dart';
 import '../models/bahan_makanan.dart';
 import '../widgets/expired_badge.dart';
 import '../widgets/kategori_chip.dart';
+import 'edit_food_screen.dart';
 
 /// Screen: FoodDetailScreen
 /// Menampilkan rincian lengkap bahan makanan dengan data yang dipassing dari list/dashboard.
@@ -46,6 +47,23 @@ class FoodDetailScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit Bahan',
+            onPressed: () async {
+              final updated = await Navigator.push<BahanMakanan>(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditFoodScreen(bahan: bahan),
+                ),
+              );
+              if (updated != null && context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
@@ -77,6 +95,40 @@ class FoodDetailScreen extends StatelessWidget {
             ],
 
             const SizedBox(height: 24),
+
+            // Tombol Edit Bahan Makanan
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final updated = await Navigator.push<BahanMakanan>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditFoodScreen(bahan: bahan),
+                    ),
+                  );
+                  if (updated != null && context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: const Text('Edit Bahan Makanan'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
 
             // Tombol Aksi Navigasi Kembali
             SizedBox(

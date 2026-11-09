@@ -7,6 +7,7 @@ import '../widgets/bahan_card.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
 import 'add_food_screen.dart';
+import 'edit_food_screen.dart';
 import 'food_detail_screen.dart';
 import 'food_list_screen.dart';
 
@@ -47,6 +48,15 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => FoodDetailScreen(bahan: bahan),
+      ),
+    );
+  }
+
+  void _navigateToEdit(BahanMakanan bahan) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditFoodScreen(bahan: bahan),
       ),
     );
   }
@@ -500,6 +510,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 (bahan) => BahanCard(
                   bahan: bahan,
                   onTap: () => _navigateToDetail(bahan),
+                  onEdit: () => _navigateToEdit(bahan),
                 ),
               ),
       ],
@@ -557,6 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 (bahan) => BahanCard(
                   bahan: bahan,
                   onTap: () => _navigateToDetail(bahan),
+                  onEdit: () => _navigateToEdit(bahan),
                 ),
               ),
       ],
