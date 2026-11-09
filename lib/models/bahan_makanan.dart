@@ -59,6 +59,11 @@ class BahanMakanan {
   bool get isExpired => sisaHari < 0;
   bool get isHampirExpired => sisaHari >= 0 && sisaHari <= 3;
 
+  // Helper status bahan makanan (Tahap 16)
+  bool get isTersedia => status == 'tersedia';
+  bool get isDikonsumsi => status == 'dikonsumsi';
+  bool get isDibuang => status == 'dibuang';
+
   // Konversi JSON Supabase → Object Dart
   factory BahanMakanan.fromJson(Map<String, dynamic> json) {
     return BahanMakanan(

@@ -18,6 +18,7 @@ class BahanProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String _filterKategori = 'Semua';
+  String _filterStatus = 'Semua';
   String _searchQuery = '';
 
   // -------------------------------------------------------------
@@ -27,11 +28,16 @@ class BahanProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get filterKategori => _filterKategori;
+  String get filterStatus => _filterStatus;
   String get searchQuery => _searchQuery;
 
-  /// Daftar bahan makanan setelah disaring berdasarkan kategori dan query pencarian
+  /// Daftar bahan makanan setelah disaring berdasarkan status, kategori, dan query pencarian
   List<BahanMakanan> get filteredBahanList {
     return _bahanList.where((bahan) {
+      // Filter status ('Semua', 'tersedia', 'dikonsumsi', 'dibuang')
+      final matchStatus = _filterStatus == 'Semua' ||
+          bahan.status.toLowerCase() == _filterStatus.toLowerCase();
+
       // Filter kategori
       final matchKategori = _filterKategori == 'Semua' ||
           bahan.kategori.toLowerCase() == _filterKategori.toLowerCase();
@@ -42,7 +48,7 @@ class BahanProvider with ChangeNotifier {
           bahan.nama.toLowerCase().contains(query) ||
           (bahan.catatan?.toLowerCase().contains(query) ?? false);
 
-      return matchKategori && matchSearch;
+      return matchStatus && matchKategori && matchSearch;
     }).toList();
   }
 
@@ -141,11 +147,16 @@ class BahanProvider with ChangeNotifier {
 
   /// Melakukan soft delete: mengubah status bahan menjadi 'dibuang'
   Future<bool> softDeleteBahan(String id) async {
+    return await updateStatusBahan(id, 'dibuang');
+  }
+
+  /// Memperbarui status bahan makanan ('dibuang', 'dikonsumsi', atau 'tersedia')
+  Future<bool> updateStatusBahan(String id, String status) async {
     _setLoading(true);
     _errorMessage = null;
 
     try {
-      final updated = await _repository.softDeleteBahan(id);
+      final updated = await _repository.updateStatusBahan(id, status);
       final index = _bahanList.indexWhere((item) => item.id == updated.id);
       if (index != -1) {
         _bahanList[index] = updated;
@@ -167,6 +178,12 @@ class BahanProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Mengatur filter status ('Semua', 'tersedia', 'dikonsumsi', 'dibuang')
+  void filterByStatus(String status) {
+    _filterStatus = status;
+    notifyListeners();
+  }
+
   /// Mengatur query pencarian
   void search(String query) {
     _searchQuery = query;
@@ -176,6 +193,7 @@ class BahanProvider with ChangeNotifier {
   /// Mereset semua filter dan pencarian
   void resetFilter() {
     _filterKategori = 'Semua';
+    _filterStatus = 'Semua';
     _searchQuery = '';
     notifyListeners();
   }

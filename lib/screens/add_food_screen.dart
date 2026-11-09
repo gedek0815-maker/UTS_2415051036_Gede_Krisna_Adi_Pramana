@@ -55,7 +55,6 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       initialDate: initial,
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
-      locale: const Locale('id', 'ID'),
     );
 
     if (picked != null) {

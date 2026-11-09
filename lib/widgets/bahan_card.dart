@@ -12,6 +12,7 @@ class BahanCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final void Function(String newStatus)? onStatusChange;
   final bool isGrid;
 
   const BahanCard({
@@ -20,6 +21,7 @@ class BahanCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onStatusChange,
     this.isGrid = false,
   });
 
@@ -107,8 +109,8 @@ class BahanCard extends StatelessWidget {
                 ),
               ),
 
-              // Menu Opsi (Edit / Hapus)
-              if (onEdit != null || onDelete != null)
+              // Menu Opsi (Status / Edit / Hapus)
+              if (onEdit != null || onDelete != null || onStatusChange != null)
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
                   shape: RoundedRectangleBorder(
@@ -117,8 +119,47 @@ class BahanCard extends StatelessWidget {
                   onSelected: (value) {
                     if (value == 'edit') onEdit?.call();
                     if (value == 'delete') onDelete?.call();
+                    if (value == 'status_dikonsumsi') onStatusChange?.call('dikonsumsi');
+                    if (value == 'status_dibuang') onStatusChange?.call('dibuang');
+                    if (value == 'status_tersedia') onStatusChange?.call('tersedia');
                   },
                   itemBuilder: (context) => [
+                    if (onStatusChange != null) ...[
+                      if (bahan.status != 'dikonsumsi')
+                        const PopupMenuItem(
+                          value: 'status_dikonsumsi',
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle_outline, size: 18, color: AppColors.safe),
+                              SizedBox(width: 8),
+                              Text('Tandai Dikonsumsi', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      if (bahan.status != 'dibuang')
+                        const PopupMenuItem(
+                          value: 'status_dibuang',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_sweep_outlined, size: 18, color: AppColors.warning),
+                              SizedBox(width: 8),
+                              Text('Tandai Dibuang', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      if (bahan.status != 'tersedia')
+                        const PopupMenuItem(
+                          value: 'status_tersedia',
+                          child: Row(
+                            children: [
+                              Icon(Icons.restore_rounded, size: 18, color: AppColors.primary),
+                              SizedBox(width: 8),
+                              Text('Pulihkan Status', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      const PopupMenuDivider(),
+                    ],
                     if (onEdit != null)
                       const PopupMenuItem(
                         value: 'edit',
@@ -173,7 +214,7 @@ class BahanCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildCategoryAvatar(size: 40),
-                  if (onEdit != null || onDelete != null)
+                  if (onEdit != null || onDelete != null || onStatusChange != null)
                     PopupMenuButton<String>(
                       icon: const Icon(Icons.more_vert, size: 20, color: AppColors.textSecondary),
                       padding: EdgeInsets.zero,
@@ -181,8 +222,29 @@ class BahanCard extends StatelessWidget {
                       onSelected: (value) {
                         if (value == 'edit') onEdit?.call();
                         if (value == 'delete') onDelete?.call();
+                        if (value == 'status_dikonsumsi') onStatusChange?.call('dikonsumsi');
+                        if (value == 'status_dibuang') onStatusChange?.call('dibuang');
+                        if (value == 'status_tersedia') onStatusChange?.call('tersedia');
                       },
                       itemBuilder: (context) => [
+                        if (onStatusChange != null) ...[
+                          if (bahan.status != 'dikonsumsi')
+                            const PopupMenuItem(
+                              value: 'status_dikonsumsi',
+                              child: Text('Tandai Dikonsumsi', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.safe)),
+                            ),
+                          if (bahan.status != 'dibuang')
+                            const PopupMenuItem(
+                              value: 'status_dibuang',
+                              child: Text('Tandai Dibuang', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.warning)),
+                            ),
+                          if (bahan.status != 'tersedia')
+                            const PopupMenuItem(
+                              value: 'status_tersedia',
+                              child: Text('Pulihkan Status', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.primary)),
+                            ),
+                          const PopupMenuDivider(),
+                        ],
                         if (onEdit != null)
                           const PopupMenuItem(
                             value: 'edit',

@@ -83,21 +83,26 @@ class SupabaseService {
     }
   }
 
-  /// SOFT DELETE: Memperbarui status bahan menjadi 'dibuang'
+  /// SOFT DELETE / STATUS UPDATE: Memperbarui status bahan ('dibuang', 'dikonsumsi', 'tersedia')
   /// Berguna untuk riwayat dan statistik pengelolaan makanan tanpa kehilangan data
-  Future<BahanMakanan> softDeleteBahan(String id) async {
+  Future<BahanMakanan> updateStatusBahan(String id, String status) async {
     try {
       final response = await _client
           .from(tableName)
-          .update({'status': 'dibuang'})
+          .update({'status': status})
           .eq('id', id)
           .select()
           .single();
 
       return BahanMakanan.fromJson(response);
     } catch (e) {
-      throw Exception('Gagal membuang bahan makanan (soft delete): $e');
+      throw Exception('Gagal memperbarui status bahan makanan ($status): $e');
     }
+  }
+
+  /// SOFT DELETE: Memperbarui status bahan menjadi 'dibuang'
+  Future<BahanMakanan> softDeleteBahan(String id) async {
+    return await updateStatusBahan(id, 'dibuang');
   }
 }
 

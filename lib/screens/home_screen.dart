@@ -62,6 +62,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _updateStatus(BahanMakanan bahan, String newStatus) async {
+    final success = await context.read<BahanProvider>().updateStatusBahan(bahan.id, newStatus);
+    if (success && mounted) {
+      final label = newStatus == 'dikonsumsi'
+          ? 'ditandai telah dikonsumsi'
+          : newStatus == 'dibuang'
+              ? 'ditandai dibuang (soft delete)'
+              : 'dipulihkan menjadi tersedia';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${bahan.nama} $label.'),
+          backgroundColor: newStatus == 'dikonsumsi'
+              ? AppColors.safe
+              : newStatus == 'dibuang'
+                  ? AppColors.warning
+                  : AppColors.primary,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -513,6 +535,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () => _navigateToDetail(bahan),
                   onEdit: () => _navigateToEdit(bahan),
                   onDelete: () => DeleteConfirmationDialog.show(context, bahan: bahan),
+                  onStatusChange: (status) => _updateStatus(bahan, status),
                 ),
               ),
       ],
@@ -572,6 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () => _navigateToDetail(bahan),
                   onEdit: () => _navigateToEdit(bahan),
                   onDelete: () => DeleteConfirmationDialog.show(context, bahan: bahan),
+                  onStatusChange: (status) => _updateStatus(bahan, status),
                 ),
               ),
       ],

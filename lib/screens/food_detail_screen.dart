@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
 import '../models/bahan_makanan.dart';
+import '../providers/bahan_provider.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/expired_badge.dart';
 import '../widgets/kategori_chip.dart';
@@ -109,6 +111,117 @@ class FoodDetailScreen extends StatelessWidget {
             ],
 
             const SizedBox(height: 24),
+
+            // Aksi Status (Dikonsumsi / Dibuang)
+            if (bahan.status == 'tersedia') ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final success = await context
+                            .read<BahanProvider>()
+                            .updateStatusBahan(bahan.id, 'dikonsumsi');
+                        if (success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${bahan.nama} ditandai telah dikonsumsi! 🍽️'),
+                              backgroundColor: AppColors.safe,
+                            ),
+                          );
+                          Navigator.pop(context);
+                        }
+                      },
+                      icon: const Icon(Icons.check_circle_outline, size: 16),
+                      label: const Text('Dikonsumsi'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.safe,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        textStyle: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final success = await context
+                            .read<BahanProvider>()
+                            .softDeleteBahan(bahan.id);
+                        if (success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${bahan.nama} ditandai dibuang (soft delete). 🗑️'),
+                              backgroundColor: AppColors.warning,
+                            ),
+                          );
+                          Navigator.pop(context);
+                        }
+                      },
+                      icon: const Icon(Icons.delete_sweep_outlined, size: 16),
+                      label: const Text('Dibuang'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.warning,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        textStyle: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ] else ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final success = await context
+                        .read<BahanProvider>()
+                        .updateStatusBahan(bahan.id, 'tersedia');
+                    if (success && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${bahan.nama} dipulihkan menjadi tersedia! ✨'),
+                          backgroundColor: AppColors.primary,
+                        ),
+                      );
+                      Navigator.pop(context);
+                    }
+                  },
+                  icon: const Icon(Icons.restore_rounded, size: 18),
+                  label: const Text('Pulihkan Status ke Tersedia'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    textStyle: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
 
             // Tombol Edit Bahan Makanan
             SizedBox(

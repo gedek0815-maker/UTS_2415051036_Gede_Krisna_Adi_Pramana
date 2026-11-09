@@ -11,17 +11,20 @@ import '../models/bahan_makanan.dart';
 class ExpiredBadge extends StatelessWidget {
   final int sisaHari;
   final bool isCompact;
+  final String status;
 
   const ExpiredBadge({
     super.key,
     required this.sisaHari,
     this.isCompact = false,
+    this.status = 'tersedia',
   });
 
   factory ExpiredBadge.fromBahan(BahanMakanan bahan, {bool isCompact = false}) {
     return ExpiredBadge(
       sisaHari: bahan.sisaHari,
       isCompact: isCompact,
+      status: bahan.status,
     );
   }
 
@@ -32,7 +35,17 @@ class ExpiredBadge extends StatelessWidget {
     IconData icon;
     String label;
 
-    if (sisaHari < 0) {
+    if (status == 'dikonsumsi') {
+      bg = const Color(0xFFE0F2FE);
+      fg = const Color(0xFF0284C7);
+      icon = Icons.task_alt_rounded;
+      label = isCompact ? 'Dikonsumsi' : 'Telah Dikonsumsi';
+    } else if (status == 'dibuang') {
+      bg = const Color(0xFFFEE2E2);
+      fg = const Color(0xFFDC2626);
+      icon = Icons.delete_outline_rounded;
+      label = isCompact ? 'Dibuang' : 'Telah Dibuang';
+    } else if (sisaHari < 0) {
       bg = AppColors.expiredLight;
       fg = AppColors.expired;
       icon = Icons.cancel_outlined;

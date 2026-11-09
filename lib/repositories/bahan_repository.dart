@@ -40,6 +40,11 @@ class BahanRepository {
     return await _supabaseService.softDeleteBahan(id);
   }
 
+  /// Memperbarui status bahan makanan ('dibuang', 'dikonsumsi', 'tersedia')
+  Future<BahanMakanan> updateStatusBahan(String id, String status) async {
+    return await _supabaseService.updateStatusBahan(id, status);
+  }
+
   /// Mengambil daftar bahan yang hampir expired (<= 3 hari) atau sudah expired
   Future<List<BahanMakanan>> getBahanHampirExpired() async {
     final allBahan = await _supabaseService.getAllBahan();
