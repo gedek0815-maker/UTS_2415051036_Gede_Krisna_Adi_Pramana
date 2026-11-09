@@ -5,6 +5,7 @@ import '../providers/bahan_provider.dart';
 import '../widgets/bahan_card.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
+import 'food_detail_screen.dart';
 import 'food_list_screen.dart';
 
 /// Screen utama: HomeScreen Dashboard
@@ -37,6 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BahanProvider>().loadBahan();
     });
+  }
+
+  void _navigateToDetail(BahanMakanan bahan) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FoodDetailScreen(bahan: bahan),
+      ),
+    );
   }
 
   @override
@@ -471,7 +481,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           )
         else
-          ...urgentList.take(3).map((bahan) => BahanCard(bahan: bahan)),
+          ...urgentList.take(3).map(
+                (bahan) => BahanCard(
+                  bahan: bahan,
+                  onTap: () => _navigateToDetail(bahan),
+                ),
+              ),
       ],
     );
   }
@@ -523,7 +538,12 @@ class _HomeScreenState extends State<HomeScreen> {
             message: 'Silakan tambahkan bahan makanan untuk mulai memantau.',
           )
         else
-          ...displayList.take(5).map((bahan) => BahanCard(bahan: bahan)),
+          ...displayList.take(5).map(
+                (bahan) => BahanCard(
+                  bahan: bahan,
+                  onTap: () => _navigateToDetail(bahan),
+                ),
+              ),
       ],
     );
   }

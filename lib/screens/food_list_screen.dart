@@ -6,6 +6,7 @@ import '../providers/bahan_provider.dart';
 import '../widgets/bahan_card.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
+import 'food_detail_screen.dart';
 
 /// Screen: FoodListScreen
 /// Menampilkan daftar bahan makanan dengan Responsive Layout menggunakan LayoutBuilder:
@@ -260,12 +261,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
           bahan: bahan,
           isGrid: false,
           onTap: () {
-            // Navigasi ke detail screen akan dihubungkan di Tahap 12
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Detail: ${bahan.nama} (Akan dibuka di Tahap 12)'),
-                duration: const Duration(milliseconds: 900),
-                behavior: SnackBarBehavior.floating,
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FoodDetailScreen(bahan: bahan),
               ),
             );
           },
@@ -295,11 +294,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
           bahan: bahan,
           isGrid: true,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Detail: ${bahan.nama} (Akan dibuka di Tahap 12)'),
-                duration: const Duration(milliseconds: 900),
-                behavior: SnackBarBehavior.floating,
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FoodDetailScreen(bahan: bahan),
               ),
             );
           },
@@ -308,3 +306,4 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 }
+
