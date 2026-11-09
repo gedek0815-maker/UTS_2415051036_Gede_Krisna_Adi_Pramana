@@ -308,7 +308,7 @@ class BahanCard extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildFallbackAvatar(icon, size),
+          errorBuilder: (_, error, stack) => _buildFallbackAvatar(icon, size),
         ),
       );
     }

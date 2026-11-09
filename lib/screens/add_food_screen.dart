@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/bahan_makanan.dart';
 import '../providers/bahan_provider.dart';
+import '../services/barcode_service.dart';
+import 'barcode_scanner_screen.dart';
 
 class AddFoodScreen extends StatefulWidget {
-  const AddFoodScreen({super.key});
+  final String? initialBarcode;
+  const AddFoodScreen({super.key, this.initialBarcode});
 
   @override
   State<AddFoodScreen> createState() => _AddFoodScreenState();
@@ -36,6 +39,16 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.initialBarcode != null && widget.initialBarcode!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _lookupAndFill(widget.initialBarcode!);
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _namaController.dispose();
     _jumlahController.dispose();
@@ -65,6 +78,104 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           _tanggalBeli = picked;
         }
       });
+    }
+  }
+
+  /// Membuka layar scanner barcode dan meng-autofill field form
+  Future<void> _scanBarcode() async {
+    final barcode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+
+    if (barcode == null || barcode.trim().isEmpty) return;
+    await _lookupAndFill(barcode.trim());
+  }
+
+  /// Lookup data barcode dan auto-fill ke form dengan fallback
+  Future<void> _lookupAndFill(String barcode) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final product = await BarcodeService.lookupProduct(barcode);
+      if (!mounted) return;
+
+      if (product.isFound) {
+        // Auto-fill nama & info produk dari hasil scan
+        setState(() {
+          _namaController.text = product.nama;
+          if (_kategoriList.contains(product.kategori)) {
+            _selectedKategori = product.kategori;
+          }
+          _jumlahController.text = product.jumlah;
+          _satuanController.text = product.satuan;
+          _lokasiController.text = product.lokasiSimpan;
+          _tanggalExpired = DateTime.now().add(Duration(days: product.defaultExpiryDays));
+
+          final note = product.catatan != null && product.catatan!.isNotEmpty
+              ? product.catatan!
+              : 'Barcode: ${product.barcode}';
+          _catatanController.text = note;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Ditemukan: ${product.nama}! Data terisi otomatis 🎉',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF2E7D32),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Fallback jika produk tidak ditemukan: catat barcode & infokan user
+        setState(() {
+          final existing = _catatanController.text.trim();
+          _catatanController.text = existing.isEmpty
+              ? 'Barcode: $barcode'
+              : '$existing\nBarcode: $barcode';
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.info_outline, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Barcode ($barcode) tidak ditemukan. Disimpan di Catatan, silakan lengkapi nama bahan.',
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFFF57C00),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memproses data barcode: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -146,6 +257,11 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       appBar: AppBar(
         title: const Text('Tambah Bahan Makanan'),
         actions: [
+          IconButton(
+            tooltip: 'Scan Barcode',
+            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            onPressed: _isLoading ? null : _scanBarcode,
+          ),
           TextButton(
             onPressed: _isLoading ? null : _submit,
             child: const Text(
@@ -162,6 +278,64 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Banner Scan Barcode Cepat
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFA5D6A7)),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: _isLoading ? null : _scanBarcode,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2E7D32),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 24),
+                          ),
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Scan Barcode Kemasan',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1E293B),
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Auto-fill nama, kategori & masa simpan',
+                                  style: TextStyle(fontSize: 12, color: Color(0xFF2E7D32)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF2E7D32)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
               _buildSectionTitle('Informasi Dasar'),
               const SizedBox(height: 8),
 
@@ -185,6 +359,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
 
               // Kategori
               DropdownButtonFormField<String>(
+                // ignore: deprecated_member_use
                 value: _selectedKategori,
                 decoration: const InputDecoration(
                   labelText: 'Kategori *',

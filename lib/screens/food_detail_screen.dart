@@ -331,7 +331,7 @@ class FoodDetailScreen extends StatelessWidget {
           child: Image.network(
             bahan.fotoUrl!,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _buildFallbackBanner(icon),
+            errorBuilder: (_, error, stack) => _buildFallbackBanner(icon),
           ),
         ),
       );

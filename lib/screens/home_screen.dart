@@ -8,6 +8,7 @@ import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
 import 'add_food_screen.dart';
+import 'barcode_scanner_screen.dart';
 import 'edit_food_screen.dart';
 import 'food_detail_screen.dart';
 import 'food_list_screen.dart';
@@ -60,6 +61,21 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) => EditFoodScreen(bahan: bahan),
       ),
     );
+  }
+
+  Future<void> _openBarcodeScanner() async {
+    final barcode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
+    );
+    if (barcode != null && barcode.isNotEmpty && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddFoodScreen(initialBarcode: barcode),
+        ),
+      );
+    }
   }
 
   void _updateStatus(BahanMakanan bahan, String newStatus) async {
@@ -127,6 +143,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.qr_code_scanner_rounded),
+          tooltip: 'Scan Barcode',
+          onPressed: _openBarcodeScanner,
+        ),
         IconButton(
           icon: const Icon(Icons.refresh_rounded),
           tooltip: 'Segarkan Data',
@@ -442,7 +463,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
             itemCount: _kategoriList.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, unused) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final kategori = _kategoriList[index];
               final isSelected = provider.filterKategori == kategori;

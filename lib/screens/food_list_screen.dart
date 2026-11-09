@@ -200,7 +200,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _kategoriList.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  separatorBuilder: (_, unused) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     final kategori = _kategoriList[index];
                     final isSelected = provider.filterKategori == kategori;
