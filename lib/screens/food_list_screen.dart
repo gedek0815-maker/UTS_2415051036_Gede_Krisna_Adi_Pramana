@@ -7,6 +7,7 @@ import '../widgets/bahan_card.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/kategori_chip.dart';
+import 'add_food_screen.dart';
 import 'edit_food_screen.dart';
 import 'food_detail_screen.dart';
 
@@ -83,13 +84,27 @@ class _FoodListScreenState extends State<FoodListScreen> {
                 builder: (context, provider, child) {
                   if (provider.isLoading && provider.bahanList.isEmpty) {
                     return const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(color: AppColors.primary),
+                          SizedBox(height: 16),
+                          Text(
+                            'Memuat inventaris makanan...',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }
 
                   if (provider.errorMessage != null && provider.bahanList.isEmpty) {
                     return EmptyStateWidget.error(
-                      errorMessage: provider.errorMessage!,
+                      errorMessage: 'Terjadi kendala saat memuat data: ${provider.errorMessage}',
                       onRetry: () => provider.loadBahan(),
                     );
                   }
@@ -97,8 +112,25 @@ class _FoodListScreenState extends State<FoodListScreen> {
                   final displayList = provider.filteredBahanList;
 
                   if (displayList.isEmpty) {
+                    if (provider.bahanList.isEmpty) {
+                      return EmptyStateWidget(
+                        icon: Icons.inventory_2_outlined,
+                        title: 'Inventaris Masih Kosong',
+                        message: 'Belum ada bahan makanan yang dicatat. Mulai tambahkan bahan makanan untuk memantau masa kedaluwarsanya.',
+                        buttonText: 'Tambah Bahan Sekarang',
+                        onButtonPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AddFoodScreen()),
+                          );
+                        },
+                      );
+                    }
+
                     return EmptyStateWidget.searchEmpty(
-                      query: provider.searchQuery,
+                      query: provider.searchQuery.isNotEmpty
+                          ? provider.searchQuery
+                          : provider.filterKategori,
                       onReset: () {
                         _searchController.clear();
                         provider.resetFilter();

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/bahan_makanan.dart';
 import '../providers/bahan_provider.dart';
 import '../services/barcode_service.dart';
+import '../services/food_api_service.dart';
+import '../widgets/open_food_facts_sheet.dart';
 import 'barcode_scanner_screen.dart';
 
 class AddFoodScreen extends StatefulWidget {
@@ -179,6 +181,49 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     }
   }
 
+  /// Membuka pencarian Open Food Facts REST API dan auto-fill ke form
+  Future<void> _searchOpenFoodFacts() async {
+    final FoodApiProduct? product = await OpenFoodFactsSearchSheet.show(context);
+    if (product == null || !mounted) return;
+
+    final parsedQty = product.parsedQuantityAndUnit;
+    final brandPrefix = product.brands != null && product.brands!.isNotEmpty
+        ? '${product.brands} - '
+        : '';
+
+    setState(() {
+      _namaController.text = '$brandPrefix${product.productName}';
+      if (_kategoriList.contains(product.foodGuardCategory)) {
+        _selectedKategori = product.foodGuardCategory;
+      }
+      _jumlahController.text = parsedQty.$1;
+      _satuanController.text = parsedQty.$2;
+      _tanggalExpired = DateTime.now().add(Duration(days: product.estimatedExpiryDays));
+
+      final note = 'Barcode: ${product.barcode}\nMerek: ${product.brands ?? '-'}\nSumber: Open Food Facts API';
+      _catatanController.text = note;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Data "${product.productName}" berhasil diisi dari Open Food Facts! 🎉',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF2E7D32),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   String _formatDate(DateTime? date) {
     if (date == null) return 'Pilih tanggal';
     return '${date.day.toString().padLeft(2, '0')}/'
@@ -258,6 +303,11 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
         title: const Text('Tambah Bahan Makanan'),
         actions: [
           IconButton(
+            tooltip: 'Cari di Open Food Facts API',
+            icon: const Icon(Icons.travel_explore_rounded, color: Colors.white),
+            onPressed: _isLoading ? null : _searchOpenFoodFacts,
+          ),
+          IconButton(
             tooltip: 'Scan Barcode',
             icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
             onPressed: _isLoading ? null : _scanBarcode,
@@ -278,63 +328,101 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Banner Scan Barcode Cepat
-              Container(
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFA5D6A7)),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: _isLoading ? null : _scanBarcode,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2E7D32),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 24),
-                          ),
-                          const SizedBox(width: 14),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+              // Pilihan Input Otomatis: Scan Barcode & Open Food Facts REST API
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFA5D6A7)),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: _isLoading ? null : _scanBarcode,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            child: Row(
                               children: [
-                                Text(
-                                  'Scan Barcode Kemasan',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1E293B),
+                                Icon(Icons.qr_code_scanner, color: Color(0xFF2E7D32), size: 22),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Scan Barcode',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                      Text(
+                                        'Kamera / demo',
+                                        style: TextStyle(fontSize: 10, color: Color(0xFF2E7D32)),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Auto-fill nama, kategori & masa simpan',
-                                  style: TextStyle(fontSize: 12, color: Color(0xFF2E7D32)),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF2E7D32)),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE0F2FE),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFBAE6FD)),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: _isLoading ? null : _searchOpenFoodFacts,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            child: Row(
+                              children: [
+                                Icon(Icons.public, color: Color(0xFF0284C7), size: 22),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Cari di API',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                      Text(
+                                        'Open Food Facts',
+                                        style: TextStyle(fontSize: 10, color: Color(0xFF0284C7)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 18),
 
               _buildSectionTitle('Informasi Dasar'),
               const SizedBox(height: 8),
@@ -342,11 +430,16 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               // Nama
               TextFormField(
                 controller: _namaController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Nama Bahan *',
                   hintText: 'Contoh: Bayam, Ayam, Susu...',
-                  prefixIcon: Icon(Icons.food_bank_outlined),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.food_bank_outlined),
+                  suffixIcon: IconButton(
+                    tooltip: 'Cari di Open Food Facts API',
+                    icon: const Icon(Icons.travel_explore_rounded, color: Color(0xFF2E7D32)),
+                    onPressed: _searchOpenFoodFacts,
+                  ),
+                  border: const OutlineInputBorder(),
                 ),
                 textCapitalization: TextCapitalization.words,
                 validator: (v) {

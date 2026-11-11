@@ -1,6 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'food_api_service.dart';
 
 /// Model hasil lookup barcode makanan/produk
 class BarcodeProduct {
@@ -213,73 +212,35 @@ class BarcodeService {
       return _localCatalog[cleanCode]!;
     }
 
-    // 2. Coba fetch dari Open Food Facts API (Fallback Online)
+    // 2. Coba fetch dari Open Food Facts REST API via FoodApiService
     try {
-      final url = Uri.parse('https://world.openfoodfacts.org/api/v0/product/$cleanCode.json');
-      final response = await http.get(url).timeout(const Duration(seconds: 4));
+      final apiProduct = await FoodApiService.getProductByBarcode(cleanCode);
+      if (apiProduct != null && apiProduct.productName.isNotEmpty) {
+        final parsedQty = apiProduct.parsedQuantityAndUnit;
+        final brandPrefix = apiProduct.brands != null && apiProduct.brands!.isNotEmpty
+            ? '${apiProduct.brands} - '
+            : '';
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == 1 && data['product'] != null) {
-          final p = data['product'];
-          final String nama = (p['product_name_id'] ?? p['product_name'] ?? p['generic_name'] ?? '').toString().trim();
-          final String brand = (p['brands'] ?? '').toString().trim();
-          final String quantityStr = (p['quantity'] ?? '').toString().trim();
-          final String categories = (p['categories'] ?? '').toString().toLowerCase();
-
-          if (nama.isNotEmpty) {
-            final parsedKategori = _guessCategory(categories, nama);
-            final parsedQty = _parseQuantity(quantityStr);
-
-            return BarcodeProduct(
-              barcode: cleanCode,
-              nama: brand.isNotEmpty ? '$brand - $nama' : nama,
-              kategori: parsedKategori,
-              jumlah: parsedQty.$1,
-              satuan: parsedQty.$2,
-              lokasiSimpan: _guessLocation(parsedKategori),
-              defaultExpiryDays: _guessExpiryDays(parsedKategori),
-              brand: brand.isNotEmpty ? brand : null,
-              imageUrl: p['image_front_small_url'] as String?,
-              catatan: 'Barcode: $cleanCode\nSumber: Open Food Facts',
-              isFound: true,
-            );
-          }
-        }
+        return BarcodeProduct(
+          barcode: cleanCode,
+          nama: '$brandPrefix${apiProduct.productName}',
+          kategori: apiProduct.foodGuardCategory,
+          jumlah: parsedQty.$1,
+          satuan: parsedQty.$2,
+          lokasiSimpan: _guessLocation(apiProduct.foodGuardCategory),
+          defaultExpiryDays: apiProduct.estimatedExpiryDays,
+          brand: apiProduct.brands,
+          imageUrl: apiProduct.imageUrl,
+          catatan: 'Barcode: $cleanCode\nSumber: Open Food Facts API',
+          isFound: true,
+        );
       }
     } catch (e) {
-      debugPrint('[BarcodeService] Online lookup failed or timeout: $e');
+      debugPrint('[BarcodeService] FoodApiService lookup failed: $e');
     }
 
     // 3. Fallback jika tidak ditemukan
     return BarcodeProduct.notFound(cleanCode);
-  }
-
-  /// Memprediksi kategori makanan berdasarkan teks kategori dan nama produk
-  static String _guessCategory(String categoryText, String productName) {
-    final text = '$categoryText $productName'.toLowerCase();
-    if (text.contains('sayur') || text.contains('vegetable') || text.contains('spinach') || text.contains('tomato')) {
-      return 'Sayuran';
-    }
-    if (text.contains('buah') || text.contains('fruit') || text.contains('apple') || text.contains('banana')) {
-      return 'Buah';
-    }
-    if (text.contains('daging') || text.contains('meat') || text.contains('chicken') || text.contains('ayam') || text.contains('beef') || text.contains('ikan') || text.contains('fish')) {
-      return 'Daging';
-    }
-    if (text.contains('susu') || text.contains('milk') || text.contains('egg') || text.contains('telur') || text.contains('cheese') || text.contains('keju') || text.contains('yogurt')) {
-      return 'Susu & Telur';
-    }
-    if (text.contains('minum') || text.contains('beverage') || text.contains('water') || text.contains('tea') || text.contains('coffee') || text.contains('juice')) {
-      return 'Minuman';
-    }
-    if (text.contains('bumbu') || text.contains('spice') || text.contains('sauce') || text.contains('sambal') || text.contains('kecap') || text.contains('garam')) {
-      return 'Bumbu';
-    }
-    if (text.contains('mie') || text.contains('noodle') || text.contains('biskuit') || text.contains('snack') || text.contains('roti') || text.contains('bread') || text.contains('cereal')) {
-      return 'Makanan Olahan';
-    }
-    return 'Lainnya';
   }
 
   /// Memprediksi lokasi simpan berdasarkan kategori
@@ -290,7 +251,6 @@ class BarcodeService {
       case 'Sayuran':
       case 'Buah':
       case 'Susu & Telur':
-        return 'Kulkas';
       case 'Minuman':
         return 'Kulkas';
       default:
@@ -298,40 +258,7 @@ class BarcodeService {
     }
   }
 
-  /// Memprediksi masa simpan hari kedaluwarsa berdasarkan kategori
-  static int _guessExpiryDays(String kategori) {
-    switch (kategori) {
-      case 'Daging':
-        return 3;
-      case 'Sayuran':
-        return 4;
-      case 'Buah':
-        return 7;
-      case 'Susu & Telur':
-        return 10;
-      case 'Minuman':
-        return 30;
-      case 'Makanan Olahan':
-        return 90;
-      case 'Bumbu':
-        return 180;
-      default:
-        return 14;
-    }
-  }
-
-  /// Parse jumlah dan satuan dari string kuantitas Open Food Facts
-  static (String, String) _parseQuantity(String quantityStr) {
-    if (quantityStr.isEmpty) return ('1', 'pcs');
-    final match = RegExp(r'^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)?').firstMatch(quantityStr);
-    if (match != null) {
-      final qty = match.group(1) ?? '1';
-      final sat = match.group(2) ?? 'pcs';
-      return (qty, sat);
-    }
-    return ('1', 'pcs');
-  }
-
   /// Daftar barcode demo yang bisa langsung dicoba pengguna untuk testing
   static List<BarcodeProduct> get demoProducts => _localCatalog.values.toList();
 }
+

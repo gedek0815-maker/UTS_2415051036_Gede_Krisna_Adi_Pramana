@@ -183,13 +183,27 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, provider, child) {
         if (provider.isLoading && provider.bahanList.isEmpty) {
           return const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(color: AppColors.primary),
+                SizedBox(height: 16),
+                Text(
+                  'Memuat data bahan makanan...',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           );
         }
 
         if (provider.errorMessage != null && provider.bahanList.isEmpty) {
           return EmptyStateWidget.error(
-            errorMessage: provider.errorMessage!,
+            errorMessage: 'Gagal memuat inventaris: ${provider.errorMessage}',
             onRetry: () => provider.loadBahan(),
           );
         }
@@ -604,11 +618,24 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 8),
         if (displayList.isEmpty)
-          EmptyStateWidget(
-            icon: Icons.kitchen_outlined,
-            title: 'Belum Ada Bahan Makanan',
-            message: 'Silakan tambahkan bahan makanan untuk mulai memantau.',
-          )
+          if (provider.bahanList.isEmpty)
+            EmptyStateWidget(
+              icon: Icons.kitchen_outlined,
+              title: 'Belum Ada Bahan Makanan',
+              message: 'Inventaris Anda masih kosong. Mulai tambahkan bahan makanan untuk memantau masa kedaluwarsanya.',
+              buttonText: 'Tambah Bahan Makanan',
+              onButtonPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddFoodScreen()),
+                );
+              },
+            )
+          else
+            EmptyStateWidget.searchEmpty(
+              query: provider.filterKategori,
+              onReset: () => provider.filter('Semua'),
+            )
         else
           ...displayList.take(5).map(
                 (bahan) => BahanCard(
