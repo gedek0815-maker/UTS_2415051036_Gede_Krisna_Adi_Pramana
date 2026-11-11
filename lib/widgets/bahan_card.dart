@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../main.dart';
 import '../models/bahan_makanan.dart';
-import 'expired_badge.dart';
-import 'kategori_chip.dart';
 
 /// Reusable Widget: BahanCard
-/// Menampilkan ringkasan bahan makanan dalam format card.
-/// Mendukung mode ListView (horizontal layout) dan GridView (vertical layout).
+/// Menampilkan bahan makanan dalam format kartu putih (radius 16)
+/// sesuai dengan desain mockup:
+/// - Thumbnail gambar/ikon bahan di kiri
+/// - Nama bahan bold + Exp: [Tanggal] di tengah
+/// - Badge status kapsul (Aman / X hari lagi / Kedaluwarsa) + chevron di kanan
 class BahanCard extends StatelessWidget {
   final BahanMakanan bahan;
   final VoidCallback? onTap;
@@ -25,319 +25,272 @@ class BahanCard extends StatelessWidget {
     this.isGrid = false,
   });
 
+  String _formatExpDate(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    return 'Exp: ${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (isGrid) {
-      return _buildGridCard(context);
-    }
-    return _buildListCard(context);
-  }
-
-  /// Tampilan Card untuk mode ListView
-  Widget _buildListCard(BuildContext context) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      elevation: 0.5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: AppColors.border, width: 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Avatar / Ikon Kategori
-              _buildCategoryAvatar(size: 48),
-              const SizedBox(width: 14),
-
-              // Detail Informasi Bahan
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      bahan.nama,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.place_outlined,
-                          size: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 3),
-                        Flexible(
-                          child: Text(
-                            bahan.lokasiSimpan,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.scale_outlined,
-                          size: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 3),
-                        Flexible(
-                          child: Text(
-                            bahan.jumlah,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    ExpiredBadge.fromBahan(bahan, isCompact: true),
-                  ],
-                ),
-              ),
-
-              // Menu Opsi (Status / Edit / Hapus)
-              if (onEdit != null || onDelete != null || onStatusChange != null)
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  onSelected: (value) {
-                    if (value == 'edit') onEdit?.call();
-                    if (value == 'delete') onDelete?.call();
-                    if (value == 'status_dikonsumsi') onStatusChange?.call('dikonsumsi');
-                    if (value == 'status_dibuang') onStatusChange?.call('dibuang');
-                    if (value == 'status_tersedia') onStatusChange?.call('tersedia');
-                  },
-                  itemBuilder: (context) => [
-                    if (onStatusChange != null) ...[
-                      if (bahan.status != 'dikonsumsi')
-                        const PopupMenuItem(
-                          value: 'status_dikonsumsi',
-                          child: Row(
-                            children: [
-                              Icon(Icons.check_circle_outline, size: 18, color: AppColors.safe),
-                              SizedBox(width: 8),
-                              Text('Tandai Dikonsumsi', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                      if (bahan.status != 'dibuang')
-                        const PopupMenuItem(
-                          value: 'status_dibuang',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_sweep_outlined, size: 18, color: AppColors.warning),
-                              SizedBox(width: 8),
-                              Text('Tandai Dibuang', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                      if (bahan.status != 'tersedia')
-                        const PopupMenuItem(
-                          value: 'status_tersedia',
-                          child: Row(
-                            children: [
-                              Icon(Icons.restore_rounded, size: 18, color: AppColors.primary),
-                              SizedBox(width: 8),
-                              Text('Pulihkan Status', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                      const PopupMenuDivider(),
-                    ],
-                    if (onEdit != null)
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
-                            SizedBox(width: 8),
-                            Text('Edit', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
-                          ],
-                        ),
-                      ),
-                    if (onDelete != null)
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
-                            SizedBox(width: 8),
-                            Text('Hapus', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
-                          ],
-                        ),
-                      ),
-                  ],
-                )
-              else
-                const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-            ],
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
-        ),
+        ],
       ),
-    );
-  }
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                // Thumbnail Gambar Bahan di Kiri
+                _buildThumbnail(),
+                const SizedBox(width: 14),
 
-  /// Tampilan Card untuk mode GridView (Responsive Layout)
-  Widget _buildGridCard(BuildContext context) {
-    return Card(
-      elevation: 0.5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: AppColors.border, width: 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildCategoryAvatar(size: 40),
-                  if (onEdit != null || onDelete != null || onStatusChange != null)
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, size: 20, color: AppColors.textSecondary),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      onSelected: (value) {
-                        if (value == 'edit') onEdit?.call();
-                        if (value == 'delete') onDelete?.call();
-                        if (value == 'status_dikonsumsi') onStatusChange?.call('dikonsumsi');
-                        if (value == 'status_dibuang') onStatusChange?.call('dibuang');
-                        if (value == 'status_tersedia') onStatusChange?.call('tersedia');
-                      },
-                      itemBuilder: (context) => [
-                        if (onStatusChange != null) ...[
-                          if (bahan.status != 'dikonsumsi')
-                            const PopupMenuItem(
-                              value: 'status_dikonsumsi',
-                              child: Text('Tandai Dikonsumsi', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.safe)),
+                // Nama Bahan + Tanggal Expired di Tengah
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        bahan.nama,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 13,
+                            color: Color(0xFF64748B),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatExpDate(bahan.tanggalExpired),
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
                             ),
-                          if (bahan.status != 'dibuang')
-                            const PopupMenuItem(
-                              value: 'status_dibuang',
-                              child: Text('Tandai Dibuang', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.warning)),
-                            ),
-                          if (bahan.status != 'tersedia')
-                            const PopupMenuItem(
-                              value: 'status_tersedia',
-                              child: Text('Pulihkan Status', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.primary)),
-                            ),
-                          const PopupMenuDivider(),
+                          ),
                         ],
-                        if (onEdit != null)
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: Text('Edit', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
-                          ),
-                        if (onDelete != null)
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Text('Hapus', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.danger)),
-                          ),
-                      ],
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    bahan.nama,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '${bahan.jumlah} • ${bahan.lokasiSimpan}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 11,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              ExpiredBadge.fromBahan(bahan, isCompact: true),
-            ],
+                ),
+
+                const SizedBox(width: 8),
+
+                // Status Kapsul di Kanan
+                _buildStatusCapsule(),
+
+                const SizedBox(width: 6),
+
+                // Chevron Kanan
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF94A3B8),
+                  size: 22,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// Avatar ikon kategori
-  Widget _buildCategoryAvatar({required double size}) {
-    final icon = KategoriChip.getIconForKategori(bahan.kategori);
+  /// Thumbnail Kategori / Bahan
+  Widget _buildThumbnail() {
+    Color bgColor;
+    IconData icon;
+    Color iconColor;
 
-    if (bahan.fotoUrl != null && bahan.fotoUrl!.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(size / 4),
-        child: Image.network(
-          bahan.fotoUrl!,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          errorBuilder: (_, error, stack) => _buildFallbackAvatar(icon, size),
+    final lower = bahan.nama.toLowerCase();
+    final lowerKat = bahan.kategori.toLowerCase();
+
+    if (lowerKat.contains('sayur') || lower.contains('sayur') || lower.contains('kol') || lower.contains('bayam') || lower.contains('sawi') || lower.contains('selada')) {
+      bgColor = const Color(0xFFE8F5E9);
+      icon = Icons.eco_rounded;
+      iconColor = const Color(0xFF2E7D32);
+    } else if (lowerKat.contains('buah') || lower.contains('buah') || lower.contains('tomat') || lower.contains('apel') || lower.contains('jeruk')) {
+      bgColor = const Color(0xFFFFEBEE);
+      icon = Icons.apple_rounded;
+      iconColor = const Color(0xFFE53935);
+    } else if (lowerKat.contains('daging') || lower.contains('daging') || lower.contains('ayam') || lower.contains('sapi') || lower.contains('kebab') || lower.contains('sosis') || lower.contains('nugget') || lower.contains('bakso')) {
+      bgColor = const Color(0xFFFFE0B2);
+      icon = Icons.restaurant_rounded;
+      iconColor = const Color(0xFFE65100);
+    } else if (lowerKat.contains('susu') || lower.contains('susu') || lower.contains('telur') || lower.contains('keju') || lower.contains('yogurt')) {
+      bgColor = const Color(0xFFE0F2FE);
+      icon = Icons.local_drink_rounded;
+      iconColor = const Color(0xFF0284C7);
+    } else if (lowerKat.contains('pokok') || lowerKat.contains('olahan') || lower.contains('mie') || lower.contains('indomie') || lower.contains('pasta') || lower.contains('beras') || lower.contains('roti') || lower.contains('nouilles')) {
+      bgColor = const Color(0xFFFFF7ED);
+      icon = Icons.bakery_dining_rounded;
+      iconColor = const Color(0xFFB45309);
+    } else if (lowerKat.contains('minum') || lower.contains('minum') || lower.contains('energen') || lower.contains('teh') || lower.contains('kopi') || lower.contains('jus')) {
+      bgColor = const Color(0xFFE0F2FE);
+      icon = Icons.local_cafe_rounded;
+      iconColor = const Color(0xFF00897B);
+    } else {
+      bgColor = const Color(0xFFF1F5F9);
+      icon = Icons.kitchen_rounded;
+      iconColor = const Color(0xFF64748B);
+    }
+
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Center(
+        child: Icon(icon, color: iconColor, size: 24),
+      ),
+    );
+  }
+
+  /// Badge Kapsul Status: Aman (Hijau) / X hari lagi (Merah/Oranye) / Kedaluwarsa (Abu)
+  Widget _buildStatusCapsule() {
+    if (bahan.isExpired) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFCBD5E1)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.cancel_outlined, size: 13, color: Color(0xFF64748B)),
+            SizedBox(width: 4),
+            Text(
+              'Kedaluwarsa',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ],
         ),
       );
     }
 
-    return _buildFallbackAvatar(icon, size);
-  }
+    if (bahan.isHampirExpired) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFEBEE),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFFFCDD2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.warning_amber_rounded, size: 13, color: Color(0xFFE53935)),
+            const SizedBox(width: 4),
+            Text(
+              '${bahan.sisaHari} hari lagi',
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFE53935),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
-  Widget _buildFallbackAvatar(IconData icon, double size) {
+    if (bahan.sisaHari > 3 && bahan.sisaHari <= 7) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.access_time_rounded, size: 13, color: Color(0xFF64748B)),
+            const SizedBox(width: 4),
+            Text(
+              '${bahan.sisaHari} hari lagi',
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Default: Aman
     return Container(
-      width: size,
-      height: size,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(size / 4),
+        color: const Color(0xFFE8F5E9),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFC8E6C9)),
       ),
-      child: Icon(
-        icon,
-        size: size * 0.55,
-        color: AppColors.primary,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.check_circle_rounded, size: 13, color: Color(0xFF2E7D32)),
+          SizedBox(width: 4),
+          Text(
+            'Aman',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF2E7D32),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
-

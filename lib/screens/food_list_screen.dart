@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../main.dart';
 import '../models/bahan_makanan.dart';
 import '../providers/bahan_provider.dart';
 import '../widgets/bahan_card.dart';
-import '../widgets/delete_confirmation_dialog.dart';
-import '../widgets/empty_state_widget.dart';
-import '../widgets/kategori_chip.dart';
-import 'add_food_screen.dart';
 import 'edit_food_screen.dart';
 import 'food_detail_screen.dart';
 
-/// Screen: FoodListScreen
-/// Menampilkan daftar bahan makanan dengan Responsive Layout menggunakan LayoutBuilder:
-/// - Layar Compact (< 600px): ListView (vertikal single-column)
-/// - Layar Wide (≥ 600px): GridView (multi-column responsif)
-/// Dilengkapi fitur pencarian real-time dan penyaringan kategori.
+/// Screen: FoodListScreen (Tab Daftar Bahan)
+/// Menampilkan katalog bahan makanan sesuai mockup:
+/// - Custom Header (Logo daun + FoodGuard & Search Icon responsif)
+/// - Search Bar Kapsul (#EEF2EC) dengan auto-focus
+/// - Baris Filter Chip Kapsul (Semua, Sayur, Buah, Daging)
+/// - Kartu Item Bahan dengan status kapsul interaktif
+/// - Empty state ilustrasi kotak terbuka hijau + tombol "Reset Filter"
 class FoodListScreen extends StatefulWidget {
   const FoodListScreen({super.key});
 
@@ -25,21 +22,33 @@ class FoodListScreen extends StatefulWidget {
 
 class _FoodListScreenState extends State<FoodListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
-  final List<String> _kategoriList = [
-    'Semua',
-    'Sayur',
-    'Buah',
-    'Daging',
-    'Susu',
-    'Bumbu',
-    'Lainnya',
+  final List<Map<String, dynamic>> _catalogCategories = [
+    {'name': 'Semua', 'icon': Icons.grid_view_rounded, 'color': const Color(0xFF2E7D32)},
+    {'name': 'Sayur', 'icon': Icons.eco_rounded, 'color': const Color(0xFF2E7D32)},
+    {'name': 'Buah', 'icon': Icons.apple_rounded, 'color': const Color(0xFFE53935)},
+    {'name': 'Daging & Olahan', 'icon': Icons.restaurant_rounded, 'color': const Color(0xFFD84315)},
+    {'name': 'Produk Susu', 'icon': Icons.local_drink_rounded, 'color': const Color(0xFF0284C7)},
+    {'name': 'Bahan Pokok', 'icon': Icons.bakery_dining_rounded, 'color': const Color(0xFFB57C34)},
+    {'name': 'Minuman', 'icon': Icons.local_cafe_rounded, 'color': const Color(0xFF00897B)},
+    {'name': 'Lainnya', 'icon': Icons.more_horiz_rounded, 'color': const Color(0xFF64748B)},
   ];
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  void _navigateToDetail(BahanMakanan bahan) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FoodDetailScreen(bahan: bahan),
+      ),
+    );
   }
 
   void _navigateToEdit(BahanMakanan bahan) {
@@ -51,117 +60,239 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  void _updateStatus(BahanMakanan bahan, String newStatus) async {
-    final success = await context.read<BahanProvider>().updateStatusBahan(bahan.id, newStatus);
-    if (success && mounted) {
-      final label = newStatus == 'dikonsumsi'
-          ? 'ditandai telah dikonsumsi'
-          : newStatus == 'dibuang'
-              ? 'ditandai dibuang (soft delete)'
-              : 'dipulihkan menjadi tersedia';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${bahan.nama} $label.'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF4F7F2),
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
-            // Header Search & Filter Bar
-            _buildSearchAndFilterHeader(),
+            const SizedBox(height: 12),
 
-            // Konten Utama Responsif
+            // Custom Header: Logo daun + FoodGuard di kiri, Search Icon di kanan
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.eco_rounded,
+                          color: Color(0xFF2E7D32),
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'FoodGuard',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1E293B),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Tombol Search di kanan atas: Tap langsung fokus ke input pencarian
+                  GestureDetector(
+                    onTap: () {
+                      _searchFocusNode.requestFocus();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.search_rounded,
+                        color: Color(0xFF1E293B),
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // Search Bar Kapsul (#EEF2EC)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Container(
+                height: 46,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2EC),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  onChanged: (val) {
+                    context.read<BahanProvider>().search(val);
+                    setState(() {});
+                  },
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13,
+                    color: Color(0xFF1E293B),
+                  ),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    hintText: 'Cari bahan makanan...',
+                    hintStyle: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 13,
+                      color: Color(0xFF94A3B8),
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search_rounded,
+                      color: Color(0xFF64748B),
+                      size: 20,
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF64748B)),
+                            onPressed: () {
+                              _searchController.clear();
+                              context.read<BahanProvider>().search('');
+                              setState(() {});
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // Baris Filter Chip Kapsul Horizontal (Semua, Sayur, Buah, Daging)
+            Consumer<BahanProvider>(
+              builder: (context, provider, child) {
+                return SizedBox(
+                  height: 38,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _catalogCategories.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final cat = _catalogCategories[index];
+                      final name = cat['name'] as String;
+                      final icon = cat['icon'] as IconData;
+                      final isSelected = provider.filterKategori == name ||
+                          (name != 'Semua' &&
+                              provider.filterKategori != 'Semua' &&
+                              (name.toLowerCase().contains(provider.filterKategori.toLowerCase()) ||
+                                  provider.filterKategori.toLowerCase().contains(name.toLowerCase())));
+
+                      return GestureDetector(
+                        onTap: () {
+                          provider.filter(name);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF2E7D32) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected ? const Color(0xFF2E7D32) : const Color(0xFFE2E8F0),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                icon,
+                                size: 16,
+                                color: isSelected ? Colors.white : (cat['color'] as Color),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                name,
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 10),
+
+            // Daftar Bahan Makanan
             Expanded(
               child: Consumer<BahanProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading && provider.bahanList.isEmpty) {
                     return const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(color: AppColors.primary),
-                          SizedBox(height: 16),
-                          Text(
-                            'Memuat inventaris makanan...',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  if (provider.errorMessage != null && provider.bahanList.isEmpty) {
-                    return EmptyStateWidget.error(
-                      errorMessage: 'Terjadi kendala saat memuat data: ${provider.errorMessage}',
-                      onRetry: () => provider.loadBahan(),
+                      child: CircularProgressIndicator(color: Color(0xFF2E7D32)),
                     );
                   }
 
                   final displayList = provider.filteredBahanList;
 
                   if (displayList.isEmpty) {
-                    if (provider.bahanList.isEmpty) {
-                      return EmptyStateWidget(
-                        icon: Icons.inventory_2_outlined,
-                        title: 'Inventaris Masih Kosong',
-                        message: 'Belum ada bahan makanan yang dicatat. Mulai tambahkan bahan makanan untuk memantau masa kedaluwarsanya.',
-                        buttonText: 'Tambah Bahan Sekarang',
-                        onButtonPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const AddFoodScreen()),
-                          );
-                        },
-                      );
-                    }
-
-                    return EmptyStateWidget.searchEmpty(
-                      query: provider.searchQuery.isNotEmpty
-                          ? provider.searchQuery
-                          : provider.filterKategori,
-                      onReset: () {
-                        _searchController.clear();
-                        provider.resetFilter();
-                      },
-                    );
+                    return _buildEmptyState(provider);
                   }
 
                   return RefreshIndicator(
-                    color: AppColors.primary,
+                    color: const Color(0xFF2E7D32),
                     onRefresh: () => provider.loadBahan(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Informasi Jumlah Data & Mode Tampilan
-                        _buildInfoBar(displayList.length),
-
-                        // LayoutBuilder: Menentukan ListView (Compact) atau GridView (Wide)
-                        Expanded(
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final isWide = constraints.maxWidth >= 600;
-
-                              if (isWide) {
-                                return _buildWideGridView(displayList, constraints.maxWidth);
-                              } else {
-                                return _buildCompactListView(displayList);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(top: 4, bottom: 90),
+                      itemCount: displayList.length,
+                      itemBuilder: (context, index) {
+                        final bahan = displayList[index];
+                        return BahanCard(
+                          bahan: bahan,
+                          onTap: () => _navigateToDetail(bahan),
+                          onEdit: () => _navigateToEdit(bahan),
+                        );
+                      },
                     ),
                   );
                 },
@@ -173,203 +304,110 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  /// Header Pencarian dan Filter Kategori
-  Widget _buildSearchAndFilterHeader() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Column(
-        children: [
-          // Input Field Pencarian
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Cari bahan makanan atau catatan...',
-              hintStyle: const TextStyle(
+  /// Empty State: Ilustrasi Kotak Terbuka Hijau + Tombol Reset Filter
+  Widget _buildEmptyState(BahanProvider provider) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F5E9),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2E7D32).withValues(alpha: 0.1),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: const [
+                  Icon(
+                    Icons.all_inbox_rounded,
+                    size: 52,
+                    color: Color(0xFF2E7D32),
+                  ),
+                  Positioned(
+                    top: 18,
+                    right: 22,
+                    child: Icon(
+                      Icons.spa_rounded,
+                      size: 20,
+                      color: Color(0xFF81C784),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Tidak Ditemukan',
+              style: TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
-              prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear_rounded, size: 18),
-                      onPressed: () {
-                        _searchController.clear();
-                        context.read<BahanProvider>().search('');
-                        setState(() {});
-                      },
-                    )
-                  : null,
-              filled: true,
-              fillColor: AppColors.background,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1E293B),
               ),
             ),
-            onChanged: (value) {
-              context.read<BahanProvider>().search(value);
-              setState(() {});
-            },
-          ),
-          const SizedBox(height: 10),
-
-          // Horizontal Filter Chips
-          Consumer<BahanProvider>(
-            builder: (context, provider, _) {
-              return SizedBox(
-                height: 38,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _kategoriList.length,
-                  separatorBuilder: (_, unused) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final kategori = _kategoriList[index];
-                    final isSelected = provider.filterKategori == kategori;
-                    return KategoriChip(
-                      label: kategori,
-                      isSelected: isSelected,
-                      onSelected: (_) {
-                        provider.filter(kategori);
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Banner informasi jumlah bahan dan status responsif
-  Widget _buildInfoBar(int totalData) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: AppColors.background,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Menampilkan $totalData bahan makanan',
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+            const SizedBox(height: 6),
+            const Text(
+              'Coba ubah kata kunci atau filter yang dipilih.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12.5,
+                color: Color(0xFF64748B),
+              ),
             ),
-          ),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            const SizedBox(height: 18),
+            InkWell(
+              onTap: () {
+                _searchController.clear();
+                provider.resetFilter();
+                setState(() {});
+              },
+              borderRadius: BorderRadius.circular(24),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: AppColors.border),
+                  color: const Color(0xFF2E7D32),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2E7D32).withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      MediaQuery.of(context).size.width >= 600
-                          ? Icons.grid_view_rounded
-                          : Icons.view_agenda_outlined,
-                      size: 13,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: 4),
+                  children: const [
+                    Icon(Icons.refresh_rounded, color: Colors.white, size: 18),
+                    SizedBox(width: 8),
                     Text(
-                      MediaQuery.of(context).size.width >= 600 ? 'Wide (Grid)' : 'Compact (List)',
-                      style: const TextStyle(
+                      'Reset Filter',
+                      style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 11,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// MODE 1: Compact Layout (< 600px) menggunakan ListView.builder
-  Widget _buildCompactListView(List<BahanMakanan> items) {
-    return ListView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(top: 4, bottom: 20),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final bahan = items[index];
-        return BahanCard(
-          bahan: bahan,
-          isGrid: false,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FoodDetailScreen(bahan: bahan),
               ),
-            );
-          },
-          onEdit: () => _navigateToEdit(bahan),
-          onDelete: () => DeleteConfirmationDialog.show(context, bahan: bahan),
-          onStatusChange: (status) => _updateStatus(bahan, status),
-        );
-      },
-    );
-  }
-
-  /// MODE 2: Wide Layout (≥ 600px) menggunakan GridView.builder
-  Widget _buildWideGridView(List<BahanMakanan> items, double maxWidth) {
-    // 2 kolom untuk tablet (600 - 900px), 3 kolom untuk desktop (> 900px)
-    final crossAxisCount = maxWidth >= 900 ? 3 : 2;
-
-    return GridView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.45,
+            ),
+          ],
+        ),
       ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final bahan = items[index];
-        return BahanCard(
-          bahan: bahan,
-          isGrid: true,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FoodDetailScreen(bahan: bahan),
-              ),
-            );
-          },
-          onEdit: () => _navigateToEdit(bahan),
-          onDelete: () => DeleteConfirmationDialog.show(context, bahan: bahan),
-          onStatusChange: (status) => _updateStatus(bahan, status),
-        );
-      },
     );
   }
 }
-

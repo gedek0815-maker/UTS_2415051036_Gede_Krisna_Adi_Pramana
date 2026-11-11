@@ -38,9 +38,8 @@ class BahanProvider with ChangeNotifier {
       final matchStatus = _filterStatus == 'Semua' ||
           bahan.status.toLowerCase() == _filterStatus.toLowerCase();
 
-      // Filter kategori
-      final matchKategori = _filterKategori == 'Semua' ||
-          bahan.kategori.toLowerCase() == _filterKategori.toLowerCase();
+      // Filter kategori fleksibel & komprehensif
+      final matchKategori = _isCategoryMatch(bahan.kategori, _filterKategori);
 
       // Filter pencarian (nama atau catatan)
       final query = _searchQuery.toLowerCase().trim();
@@ -50,6 +49,52 @@ class BahanProvider with ChangeNotifier {
 
       return matchStatus && matchKategori && matchSearch;
     }).toList();
+  }
+
+  /// Helper untuk mencocokkan kategori secara fleksibel
+  /// Menangani variasi nama kategori seperti 'Sayur' vs 'Sayur-Sayuran', 'Daging' vs 'Daging & Olahan', dll.
+  bool _isCategoryMatch(String bahanKategori, String filterKategori) {
+    if (filterKategori == 'Semua') return true;
+
+    final b = bahanKategori.toLowerCase().trim();
+    final f = filterKategori.toLowerCase().trim();
+
+    if (b == f) return true;
+
+    // Sayur / Sayuran / Sayur-Sayuran
+    if (f.contains('sayur') && b.contains('sayur')) return true;
+
+    // Buah / Buah-Buahan
+    if (f.contains('buah') && b.contains('buah')) return true;
+
+    // Daging / Daging & Olahan
+    if ((f.contains('daging') || f.contains('olahan')) &&
+        (b.contains('daging') || b.contains('olahan') || b.contains('ayam') || b.contains('sapi') || b.contains('kebab') || b.contains('sosis'))) {
+      return true;
+    }
+
+    // Produk Susu / Susu & Telur
+    if ((f.contains('susu') || f.contains('telur')) &&
+        (b.contains('susu') || b.contains('telur') || b.contains('dairy') || b.contains('keju') || b.contains('yogurt'))) {
+      return true;
+    }
+
+    // Bahan Pokok / Mie / Beras / Tepung / Makanan Olahan
+    if ((f.contains('pokok') || f.contains('beras') || f.contains('mie') || f.contains('roti')) &&
+        (b.contains('pokok') || b.contains('olahan') || b.contains('beras') || b.contains('mie') || b.contains('tepung') || b.contains('roti') || b.contains('biscuit') || b.contains('biskuit'))) {
+      return true;
+    }
+
+    // Minuman
+    if (f.contains('minum') &&
+        (b.contains('minum') || b.contains('beverage') || b.contains('jus') || b.contains('kopi') || b.contains('teh') || b.contains('energen') || b.contains('air'))) {
+      return true;
+    }
+
+    // Lainnya / Bumbu
+    if (f.contains('lain') && (b.contains('lain') || b.contains('bumbu'))) return true;
+
+    return b.contains(f) || f.contains(b);
   }
 
   /// Ringkasan statistik untuk dashboard (Tahap 10)
