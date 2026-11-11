@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/bahan_makanan.dart';
+import '../models/food_api_product.dart';
 import '../providers/bahan_provider.dart';
 import '../services/barcode_service.dart';
-import '../services/food_api_service.dart';
 import '../widgets/open_food_facts_sheet.dart';
 import 'barcode_scanner_screen.dart';
 

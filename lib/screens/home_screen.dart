@@ -387,28 +387,116 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F7F2),
-      appBar: null, // Hapus AppBar hijau global pada Root Scaffold
-      body: _buildCurrentTab(),
-      floatingActionButton: _currentIndex == 2
-          ? null // Sembunyikan FAB saat di tab Profil
-          : FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddFoodScreen(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isWide = constraints.maxWidth >= 600;
+
+        if (isWide) {
+          // ── WIDE LAYOUT (tablet / landscape ≥ 600 px) ──
+          // Gunakan NavigationRail di kiri, konten di kanan
+          return Scaffold(
+            backgroundColor: const Color(0xFFF4F7F2),
+            floatingActionButton: _currentIndex == 2
+                ? null
+                : FloatingActionButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddFoodScreen(),
+                        ),
+                      );
+                    },
+                    tooltip: 'Tambah Bahan',
+                    backgroundColor: const Color(0xFF2E7D32),
+                    elevation: 4,
+                    shape: const CircleBorder(),
+                    child: const Icon(Icons.add, color: Colors.white, size: 28),
                   ),
-                );
-              },
-              tooltip: 'Tambah Bahan',
-              backgroundColor: const Color(0xFF2E7D32),
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: const Icon(Icons.add, color: Colors.white, size: 28),
+            body: Row(
+              children: [
+                // NavigationRail untuk layar lebar
+                NavigationRail(
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: (index) {
+                    setState(() => _currentIndex = index);
+                  },
+                  backgroundColor: Colors.white,
+                  elevation: 1,
+                  labelType: NavigationRailLabelType.all,
+                  selectedIconTheme: const IconThemeData(
+                    color: Color(0xFF2E7D32),
+                    size: 26,
+                  ),
+                  unselectedIconTheme: const IconThemeData(
+                    color: Color(0xFF94A3B8),
+                    size: 24,
+                  ),
+                  selectedLabelTextStyle: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF2E7D32),
+                  ),
+                  unselectedLabelTextStyle: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF94A3B8),
+                  ),
+                  indicatorColor: const Color(0xFFE8F5E9),
+                  destinations: const [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home_outlined),
+                      selectedIcon: Icon(Icons.home_rounded),
+                      label: Text('Beranda'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.grid_view_outlined),
+                      selectedIcon: Icon(Icons.grid_view_rounded),
+                      label: Text('Daftar Bahan'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.person_outline),
+                      selectedIcon: Icon(Icons.person_rounded),
+                      label: Text('Profil'),
+                    ),
+                  ],
+                ),
+                const VerticalDivider(thickness: 1, width: 1, color: Color(0xFFE2E8F0)),
+                // Konten utama
+                Expanded(child: _buildCurrentTab()),
+              ],
             ),
-      bottomNavigationBar: _buildCustomBottomBar(),
+          );
+        }
+
+        // ── COMPACT LAYOUT (mobile / portrait < 600 px) ──
+        // Gunakan BottomNavigationBar seperti biasa
+        return Scaffold(
+          backgroundColor: const Color(0xFFF4F7F2),
+          appBar: null,
+          body: _buildCurrentTab(),
+          floatingActionButton: _currentIndex == 2
+              ? null
+              : FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddFoodScreen(),
+                      ),
+                    );
+                  },
+                  tooltip: 'Tambah Bahan',
+                  backgroundColor: const Color(0xFF2E7D32),
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  child: const Icon(Icons.add, color: Colors.white, size: 28),
+                ),
+          bottomNavigationBar: _buildCustomBottomBar(),
+        );
+      },
     );
   }
 

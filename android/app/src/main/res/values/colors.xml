@@ -3,3 +3,4 @@
     <!-- FoodGuard splash background: green-cream (#F4F7F2) to avoid white flash on startup -->
     <color name="bg_splash">#F4F7F2</color>
 </resources>
+

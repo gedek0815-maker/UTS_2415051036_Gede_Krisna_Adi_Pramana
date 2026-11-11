@@ -281,16 +281,44 @@ class _FoodListScreenState extends State<FoodListScreen> {
                   return RefreshIndicator(
                     color: const Color(0xFF2E7D32),
                     onRefresh: () => provider.loadBahan(),
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.only(top: 4, bottom: 90),
-                      itemCount: displayList.length,
-                      itemBuilder: (context, index) {
-                        final bahan = displayList[index];
-                        return BahanCard(
-                          bahan: bahan,
-                          onTap: () => _navigateToDetail(bahan),
-                          onEdit: () => _navigateToEdit(bahan),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final bool isWide = constraints.maxWidth >= 600;
+                        if (isWide) {
+                          // WIDE: Grid 2 kolom untuk tablet / landscape
+                          return GridView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.only(top: 4, bottom: 90),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 3.4,
+                              crossAxisSpacing: 0,
+                              mainAxisSpacing: 0,
+                            ),
+                            itemCount: displayList.length,
+                            itemBuilder: (context, index) {
+                              final bahan = displayList[index];
+                              return BahanCard(
+                                bahan: bahan,
+                                onTap: () => _navigateToDetail(bahan),
+                                onEdit: () => _navigateToEdit(bahan),
+                              );
+                            },
+                          );
+                        }
+                        // COMPACT: ListView 1 kolom untuk mobile
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(top: 4, bottom: 90),
+                          itemCount: displayList.length,
+                          itemBuilder: (context, index) {
+                            final bahan = displayList[index];
+                            return BahanCard(
+                              bahan: bahan,
+                              onTap: () => _navigateToDetail(bahan),
+                              onEdit: () => _navigateToEdit(bahan),
+                            );
+                          },
                         );
                       },
                     ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../models/food_api_product.dart';
 import '../services/food_api_service.dart';
 
 /// Modal Bottom Sheet untuk mencari & memilih produk dari Open Food Facts REST API
