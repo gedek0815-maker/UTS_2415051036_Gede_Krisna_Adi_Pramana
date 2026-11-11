@@ -72,33 +72,41 @@ class BahanCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.place_outlined,
                           size: 13,
                           color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 3),
-                        Text(
-                          bahan.lokasiSimpan,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
+                        Flexible(
+                          child: Text(
+                            bahan.lokasiSimpan,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Icon(
+                        const SizedBox(width: 8),
+                        const Icon(
                           Icons.scale_outlined,
                           size: 13,
                           color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 3),
-                        Text(
-                          bahan.jumlah,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
+                        Flexible(
+                          child: Text(
+                            bahan.jumlah,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                       ],

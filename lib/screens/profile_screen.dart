@@ -60,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 4),
             const Text('• Nama: Gede Krisna Adi Pramana', style: TextStyle(fontSize: 12)),
             const Text('• NIM: 2415051036', style: TextStyle(fontSize: 12)),
-            const Text('• Kelas: 4A', style: TextStyle(fontSize: 12)),
+            const Text('• Kelas: 5B', style: TextStyle(fontSize: 12)),
             const Text('• Prodi: Pendidikan Teknik Informatika', style: TextStyle(fontSize: 12)),
             const SizedBox(height: 10),
             const Text(
@@ -387,7 +387,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
-                  'NIM: 2415051036 • Kelas 4A',
+                  'NIM: 2415051036 • Kelas 5B',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
