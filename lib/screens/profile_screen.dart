@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/bahan_provider.dart';
 import 'barcode_scanner_screen.dart';
 
@@ -18,6 +21,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _notifikasiAktif = true;
   bool _notifikasiHarian = true;
   bool _modeGelap = false;
+  String? _profileImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileImage();
+  }
+
+  Future<void> _loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final path = prefs.getString('profile_image_path');
+    if (path != null && mounted) {
+      setState(() => _profileImagePath = path);
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final XFile? picked = await picker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+      if (picked != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('profile_image_path', picked.path);
+        if (mounted) {
+          setState(() => _profileImagePath = picked.path);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Foto profil berhasil diubah! 🎉'),
+              backgroundColor: Color(0xFF2E7D32),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memilih foto: ${e.toString()}'),
+            backgroundColor: const Color(0xFFD32F2F),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   /// Modal Bottom Sheet Pengaturan Aplikasi
   void _showSettingsSheet() {
@@ -291,12 +345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: const Text('Pilih dari Galeri', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Foto profil berhasil diperbarui! 🎉'),
-                          backgroundColor: Color(0xFF2E7D32),
-                        ),
-                      );
+                      _pickImage(ImageSource.gallery);
                     },
                   ),
                   ListTile(
@@ -311,12 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: const Text('Buka Kamera', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Kamera siap digunakan.'),
-                          backgroundColor: Color(0xFF0284C7),
-                        ),
-                      );
+                      _pickImage(ImageSource.camera);
                     },
                   ),
                 ],
@@ -948,13 +992,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ],
                       ),
-                      child: const CircleAvatar(
-                        backgroundColor: Color(0xFFE8F5E9),
-                        child: Icon(
-                          Icons.person_rounded,
-                          size: 52,
-                          color: Color(0xFF2E7D32),
-                        ),
+                      child: CircleAvatar(
+                        backgroundColor: const Color(0xFFE8F5E9),
+                        backgroundImage: _profileImagePath != null
+                            ? FileImage(File(_profileImagePath!))
+                            : null,
+                        child: _profileImagePath == null
+                            ? const Icon(
+                                Icons.person_rounded,
+                                size: 52,
+                                color: Color(0xFF2E7D32),
+                              )
+                            : null,
                       ),
                     ),
                     Positioned(
