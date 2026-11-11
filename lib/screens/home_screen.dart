@@ -12,6 +12,7 @@ import 'barcode_scanner_screen.dart';
 import 'edit_food_screen.dart';
 import 'food_detail_screen.dart';
 import 'food_list_screen.dart';
+import 'profile_screen.dart';
 
 /// Screen utama: HomeScreen Dashboard
 /// Menampilkan ringkasan inventaris (summary cards), status bahan segera olah,
@@ -167,11 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return const FoodListScreen();
       case 2:
-        return _buildPlaceholderTab(
-          title: 'Profil Pengguna',
-          message: 'Informasi mahasiswa & aplikasi akan tampil di Tahap 19.',
-          icon: Icons.person_rounded,
-        );
+        return const ProfileScreen();
       default:
         return _buildDashboardTab();
     }
@@ -647,53 +644,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
       ],
-    );
-  }
-
-  /// Placeholder untuk Tab yang akan dibuat pada tahap selanjutnya
-  Widget _buildPlaceholderTab({
-    required String title,
-    required String message,
-    required IconData icon,
-  }) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryLight,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 48, color: AppColors.primary),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              title,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 13,
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
