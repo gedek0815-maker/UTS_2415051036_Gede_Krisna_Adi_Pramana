@@ -23,3 +23,4 @@
 
 # Reflection & Metadata
 -keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+
