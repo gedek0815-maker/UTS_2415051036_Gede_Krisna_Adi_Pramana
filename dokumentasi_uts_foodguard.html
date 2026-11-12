@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dokumentasi Singkat UTS Pemrograman Mobile - FoodGuard</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm 15mm 20mm 15mm;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #1e293b;
+      line-height: 1.6;
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 50px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .header-banner {
+      border-bottom: 3px solid #2e7d32;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-banner h1 {
+      margin: 0;
+      color: #1b5e20;
+      font-size: 26px;
+      font-weight: 800;
+    }
+    .header-banner p {
+      margin: 4px 0 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+    .badge-status {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 13px;
+      border: 1px solid #c8e6c9;
+    }
+    h2 {
+      color: #1b5e20;
+      font-size: 18px;
+      border-left: 4px solid #2e7d32;
+      padding-left: 12px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    h3 {
+      color: #334155;
+      font-size: 15px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 13.5px;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 10px 14px;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+    }
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .info-card {
+      background: #f4f7f2;
+      border: 1px solid #dcfce7;
+      border-left: 4px solid #2e7d32;
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-size: 13.5px;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      margin: 20px 0;
+    }
+    .gallery-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 290px;
+      object-fit: contain;
+      background: #f1f5f9;
+      display: block;
+    }
+    .gallery-caption {
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: #475569;
+      background: #ffffff;
+      border-top: 1px solid #f1f5f9;
+      font-weight: 600;
+    }
+    .gallery-desc {
+      font-weight: 400;
+      color: #64748b;
+      display: block;
+      margin-top: 2px;
+      font-size: 11.5px;
+    }
+    pre {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Courier New', Courier, monospace;
+      line-height: 1.45;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tag-green { background: #dcfce7; color: #166534; }
+    .tag-blue { background: #e0f2fe; color: #075985; }
+    .tag-orange { background: #ffedd5; color: #9a3412; }
+    .page-break {
+      page-break-after: always;
+      break-after: page;
+    }
+    @media print {
+      body {
+        background: transparent;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .no-print {
+        display: none;
+      }
+    }
+    .print-button {
+      background: #2e7d32;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .print-button:hover {
+      background: #1b5e20;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Tombol Cetak Browser -->
+    <div class="no-print" style="text-align: right; margin-bottom: 10px;">
+      <button class="print-button" onclick="window.print()">
+        🖨️ Cetak / Simpan sebagai PDF (Ctrl + P)
+      </button>
+      <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+        *Pilih Destination: <strong>Save as PDF</strong>, Paper Size: <strong>A4</strong>, centang <strong>Background graphics</strong>.
+      </div>
+    </div>
+
+    <!-- Header Dokumen -->
+    <div class="header-banner">
+      <div>
+        <h1>DOKUMENTASI SINGKAT PROYEK UTS</h1>
+        <p>Mata Kuliah: <strong>Pemrograman Mobile</strong> — Program Studi S1 Pendidikan Teknik Informatika</p>
+      </div>
+      <div class="badge-status">
+        UTS GANJIL 2026/2027
+      </div>
+    </div>
+
+    <!-- Bagian 1: Identitas & Informasi Proyek -->
+    <h2>1. Identitas Mahasiswa & Informasi Proyek</h2>
+    <table>
+      <tr>
+        <th style="width: 30%;">Keterangan</th>
+        <th style="width: 70%;">Data Proyek UTS</th>
+      </tr>
+      <tr>
+        <td><strong>Nama Mahasiswa</strong></td>
+        <td><strong>Gede Krisna Adi Pramana</strong></td>
+      </tr>
+      <tr>
+        <td><strong>NIM / Kelas</strong></td>
+        <td><strong>2415051036 / Kelas 5B</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Program Studi</strong></td>
+        <td>S1 Pendidikan Teknik Informatika (PTI) — Universitas Pendidikan Ganesha</td>
+      </tr>
+      <tr>
+        <td><strong>Nama Aplikasi</strong></td>
+        <td><strong>FoodGuard</strong> (Food Expiry Tracker & Waste Prevention)</td>
+      </tr>
+      <tr>
+        <td><strong>Tema Aplikasi</strong></td>
+        <td>Aplikasi Pemantau Tanggal Kedaluwarsa Bahan Makanan Rumah Tangga</td>
+      </tr>
+      <tr>
+        <td><strong>URL GitHub Repository</strong></td>
+        <td><a href="https://github.com/gedek0815-maker/UTS_2415051036_Gede_Krisna_Adi_Pramana" target="_blank">https://github.com/gedek0815-maker/UTS_2415051036_Gede_Krisna_Adi_Pramana</a></td>
+      </tr>
+      <tr>
+        <td><strong>Nama Branch Utama</strong></td>
+        <td><code>main</code></td>
+      </tr>
+      <tr>
+        <td><strong>Hash Commit Final</strong></td>
+        <td><code>fd1a65b86acb05e51d37c0b3c032c241b36220fe</code> (25 Meaningful Commits)</td>
+      </tr>
+      <tr>
+        <td><strong>Backend / Database</strong></td>
+        <td><strong>Supabase (Cloud PostgreSQL)</strong> — Tabel <code>bahan_makanan</code></td>
+      </tr>
+      <tr>
+        <td><strong>REST API</strong></td>
+        <td><strong>Open Food Facts API</strong> (<code>world.openfoodfacts.org</code>)</td>
+      </tr>
+      <tr>
+        <td><strong>Lokasi File APK Release</strong></td>
+        <td><code>build/app/outputs/flutter-apk/app-release.apk</code></td>
+      </tr>
+    </table>
+
+    <!-- Bagian 2: Penjelasan Arsitektur Aplikasi -->
+    <h2>2. Penjelasan Arsitektur Aplikasi</h2>
+    <p>Aplikasi <strong>FoodGuard</strong> dibangun menggunakan pendekatan <strong>Clean Architecture & Repository Pattern</strong> dengan pemisahan peran yang modular:</p>
+    
+    <div class="info-card">
+      <strong>Alur Data Aplikasi:</strong><br>
+      <code>UI (Screens & Reusable Widgets) ➔ State Management (BahanProvider) ➔ Repository Layer (BahanRepository) ➔ Services (SupabaseService, FoodApiService, BarcodeService) ➔ Backend & API</code>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Layer</th>
+          <th>Folder</th>
+          <th>Deskripsi & Tanggung Jawab</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-green">Presentation</span></td>
+          <td><code>lib/screens/</code> & <code>lib/widgets/</code></td>
+          <td>Menampilkan antarmuka responsif pengguna, menerima input formulir, dan mengonsumsi data dari Provider tanpa menyentuh service secara langsung.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">State</span></td>
+          <td><code>lib/providers/</code></td>
+          <td>Menggunakan <code>ChangeNotifier</code> (Provider) untuk mengelola shared state: daftar bahan, filter kategori, status loading, empty state, dan error state.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-orange">Domain / Repo</span></td>
+          <td><code>lib/repositories/</code></td>
+          <td>Sebagai abstraksi antara data source dan UI state logic (Data Access Layer).</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">Data Source</span></td>
+          <td><code>lib/services/</code></td>
+          <td>Berisi <code>SupabaseService</code> (CRUD PostgreSQL Cloud), <code>FoodApiService</code> (REST API HTTP Client), dan <code>BarcodeService</code>.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">Model</span></td>
+          <td><code>lib/models/</code></td>
+          <td>Berisi <code>BahanMakanan</code> dan <code>FoodApiProduct</code> dengan serialisasi <code>fromJson()</code> dan <code>toJson()</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- Bagian 3: Screenshot Layar Aplikasi -->
+    <h2>3. Screenshot Layar Aplikasi (Seluruh Screen & Deliverables)</h2>
+    <p>Berikut adalah bukti tangkapan layar antarmuka fungsional aplikasi FoodGuard sesuai spesifikasi wajib UTS:</p>
+
+    <div class="gallery-grid">
+      <!-- 1. Home / Dashboard -->
+      <div class="gallery-item">
+        <img src="screenshots/01_beranda.png" alt="Beranda Screen">
+        <div class="gallery-caption">
+          1. Home Screen (Beranda)
+          <span class="gallery-desc">Dashboard ringkasan 4 kartu statistik (Total, Aman, Hampir Expired, Kedaluwarsa), banner edukasi, filter kategori, dan daftar 'Segera Olah!'.</span>
+        </div>
+      </div>
+
+      <!-- 2. List / Catalog -->
+      <div class="gallery-item">
+        <img src="screenshots/02_daftar_bahan.png" alt="Daftar Bahan Screen">
+        <div class="gallery-caption">
+          2. List / Catalog Screen (Daftar Bahan)
+          <span class="gallery-desc">Daftar inventaris bahan makanan dengan live search kapsul, 8 filter chips kategori, badge status kedaluwarsa, dan sorting.</span>
+        </div>
+      </div>
+
+      <!-- 3. Profile Screen -->
+      <div class="gallery-item">
+        <img src="screenshots/03_profil.png" alt="Profile Screen">
+        <div class="gallery-caption">
+          3. Profile Screen (Profil Mahasiswa & Pengaturan)
+          <span class="gallery-desc">Menampilkan identitas mahasiswa (Gede Krisna Adi Pramana - 2415051036 - Kelas 5B), foto profil dinamis (galeri/kamera), statistik ringkas, dan menu.</span>
+        </div>
+      </div>
+
+      <!-- 4. Barcode Scanner Camera -->
+      <div class="gallery-item">
+        <img src="screenshots/05_scan_barcode.png" alt="Barcode Scanner Screen">
+        <div class="gallery-caption">
+          4. Barcode Scanner Screen (Kamera Native)
+          <span class="gallery-desc">Integrasi kamera perangkat dengan paket mobile_scanner & ML Kit untuk mendeteksi barcode kemasan secara instan, senter, dan ganti kamera.</span>
+        </div>
+      </div>
+
+      <!-- 5. Form Tambah Bahan & Open Food Facts -->
+      <div class="gallery-item">
+        <img src="screenshots/04_tambah_bahan.jpg" alt="Tambah Bahan Screen">
+        <div class="gallery-caption">
+          5. Create Screen & REST API Auto-Fill
+          <span class="gallery-desc">Formulir tambah bahan makanan, integrasi REST API Open Food Facts untuk pencarian produk otomatis, serta bottom sheet pemilih kategori.</span>
+        </div>
+      </div>
+
+      <!-- 6. Empty State Handling -->
+      <div class="gallery-item">
+        <img src="screenshots/06_empty_state.png" alt="Empty State Screen">
+        <div class="gallery-caption">
+          6. Empty State & Error Handling
+          <span class="gallery-desc">Tampilan informatif saat hasil pencarian atau filter kategori tidak ditemukan, dilengkapi tombol aksi interaktif 'Reset Filter'.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- Screenshot Detail Dialog & Mockup -->
+    <h3>Tangkapan Layar Tambahan: Dialog Profil & Mockup Overview</h3>
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <img src="screenshots/07_profil_dialogs.png" alt="Dialog Profil">
+        <div class="gallery-caption">
+          7. Dialog Tentang FoodGuard & Panduan Penggunaan
+          <span class="gallery-desc">Modal dialog informasi pengembang (Gede Krisna Adi Pramana - 2415051036 - Kelas 5B), panduan 3 langkah, dan konfirmasi keluar.</span>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="screenshots/04_mockup_overview.jpg" alt="Mockup Overview">
+        <div class="gallery-caption">
+          8. Desain Referensi Mockup vs Implementasi
+          <span class="gallery-desc">Kesesuaian antarmuka aplikasi dengan standar desain warna Forest Green (#2E7D32), kartu rounded radius 16, dan tipografi Poppins.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bagian 4: Evaluasi 8 Spesifikasi Minimum Project -->
+    <h2>4. Pemenuhan 8 Spesifikasi Minimum Project UTS</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Spesifikasi Wajib</th>
+          <th>Status</th>
+          <th>Implementasi dalam Kode</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Screen & Navigasi</strong> (Min. 6 screen)</td>
+          <td><span class="tag tag-green">100% Terpenuhi</span></td>
+          <td>7 Screen fungsional (Home, List, Detail, Add, Edit, Barcode Scanner, Profile) dengan <code>BottomNavigationBar</code> dan passing data parameter.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Flutter UI & Components</strong></td>
+          <td><span class="tag tag-green">100% Terpenuhi</span></td>
+          <td>Penggunaan modular Scaffold, ListView, GridView, serta custom widgets: <code>BahanCard</code>, <code>ExpiredBadge</code>, <code>KategoriChip</code>, <code>EmptyStateWidget</code>.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Responsive Layout</strong></td>
+          <td><span class="tag tag-green">100% Terpenuhi</span></td>
+          <td>Menggunakan <code>LayoutBuilder</code> (breakpoint 600px): compact ponsel beralih ke <code>NavigationRail</code> dan <code>GridView</code> multi-kolom pada layar wide.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>REST API Publik</strong></td>
+          <td><span class="tag tag-green">100% Terpenuhi</span></td>
+          <td>REST API Open Food Facts (GET) di <code>FoodApiService</code> dengan Dart Model <code>FoodApiProduct.fromJson()</code> dan penanganan 3 state: loading, error, empty.</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>Backend & Database (Supabase)</strong></td>
+          <td><span class="tag tag-green">100% Terpenuhi</span></td>
+          <td>CRUD lengkap Cloud Supabase (PostgreSQL) pada tabel <code>bahan_makanan</code> (id, nama, kategori, tanggal_expired, catatan, status) + Delete Confirmation Dialog.</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><strong>State Management (Provider)</strong></td>
+          <td><span class="tag tag-green">100% Terpenuhi</span></td>
+          <td><code>BahanProvider</code> dengan <code>ChangeNotifier</code> mengelola data, loading, error, dan shared state lintas screen (filter kategori & pencarian).</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><strong>Clean Architecture</strong></td>
+          <td><span class="tag tag-green">100% Terpenuhi</span></td>
+          <td>Pemisahan terstruktur: <code>models/</code>, <code>services/</code>, <code>repositories/</code>, <code>providers/</code>, <code>screens/</code>, <code>widgets/</code>, <code>main.dart</code>.</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><strong>Git & Version Control</strong></td>
+          <td><span class="tag tag-green">100% Terpenuhi</span></td>
+          <td>25 Commit terstruktur, mencakup 21 Tahap pengerjaan dari inisialisasi hingga final README.md.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- Bagian 5: Bukti Git Log -->
+    <h2>5. Bukti Git Log (--oneline)</h2>
+    <p>Riwayat commit pada branch <code>main</code> menunjukkan proses pengembangan yang bertahap dan teratur (25 Commit):</p>
+
+    <pre>
+fd1a65b Finalize FoodGuard app, add README and documentation
+daaa7ed Fix mobile_scanner release crash: Proguard rules, disable minification, ML Kit dependencies
+d4001dd Tahap 20: image picker (gallery & camera), UI polish, shared_preferences for profile photo
+0feeb23 Fix: responsive layout (LayoutBuilder+NavigationRail) and architecture (extract FoodApiProduct model)
+9df2cfa Complete UI refactor: custom nav, notifications, category filter, overflow fixes, and splash fix
+84ba6e2 Refine UI consistency, fix responsive issues, and improve UX
+c68f6db Add Profile screen with app info and settings
+62e9e9c Add loading, error, and empty state handling across all screens
+9d5f87a Add barcode scanner feature using mobile_scanner package
+e7ed06c Implement soft delete and food consumption status management
+3b05a21 Implement delete confirmation dialog and delete food functionality
+6c464bc Add EditFoodScreen and wire edit actions in detail and list screens
+7889849 Add AddFoodScreen with form validation and floating action button
+d72eb4e Add FoodDetail screen with navigation and data passing
+0937117 Implement responsive layout using LayoutBuilder for list and grid view
+6c2be34 Build HomeScreen dashboard with summary cards and bottom navigation
+1d14218 Add reusable widgets: BahanCard, ExpiredBadge, KategoriChip, EmptyState
+f842c1a Build app theme, colors, and base UI setup
+27ffa49 Implement BahanProvider with ChangeNotifier
+aff98e0 Add BahanRepository as data access layer
+8185597 Add SupabaseService with CRUD operations
+9b2fa40 Setup Supabase connection and initialize in main.dart
+904674c Add BahanMakanan model with expired helper methods
+971a5cf Setup project architecture and folder structure
+37af6d1 Initialize FoodGuard Flutter UTS project
+    </pre>
+
+    <!-- Bagian 6: Catatan Kendala & Solusi -->
+    <h2>6. Catatan Kendala Utama & Solusi Teknis</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Kendala yang Dihadapi</th>
+          <th>Dampak</th>
+          <th>Solusi yang Diterapkan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Crash Kamera pada APK Release</strong> (<code>mobile_scanner</code> & ML Kit)</td>
+          <td>Fitur scan barcode berfungsi saat debug, tetapi memicu <code>NullPointerException (getClass() on null)</code> saat aplikasi di-build menjadi APK Release.</td>
+          <td>Menonaktifkan minifikasi R8 pada <code>android/app/build.gradle.kts</code> (<code>isMinifyEnabled = false</code>) dan menambahkan aturan ProGuard khusus di <code>proguard-rules.pro</code> untuk menjaga integritas library Google ML Kit.</td>
+        </tr>
+        <tr>
+          <td><strong>Shader Compilation / Impeller Issue</strong></td>
+          <td>Layar putih atau shader compilation error pada perangkat Android dengan GPU driver tertentu.</td>
+          <td>Menambahkan <code>EnableImpeller = false</code> pada <code>AndroidManifest.xml</code> serta menyetel background splash screen hijau (#F4F7F2) pada <code>launch_background.xml</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Responsivitas Layar Berbagai Ukuran</strong></td>
+          <td>Potensi <code>RenderFlex overflow</code> saat orientasi landscape atau layar tablet.</td>
+          <td>Menerapkan <code>LayoutBuilder</code> dan <code>SingleChildScrollView</code> secara konsisten dengan breakpoint 600px untuk transisi antara <code>BottomNavigationBar</code> ke <code>NavigationRail</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Footer Dokumen -->
+    <div style="margin-top: 40px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 12px; color: #64748b;">
+      Dokumentasi ini disusun sebagai syarat kelengkapan pengumpulan <strong>Ujian Tengah Semester (UTS) Pemrograman Mobile</strong>.<br>
+      © 2026 <strong>Gede Krisna Adi Pramana</strong> (NIM: 2415051036) — Kelas 5B Pendidikan Teknik Informatika Undiksha.
+    </div>
+
+  </div>
+
+</body>
+</html>
